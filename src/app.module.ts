@@ -9,7 +9,7 @@ import { User } from './users/entities/user.entity';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: '192.168.130.129',
+      host: '20.2.87.19',
       port: 5432,
       password: 'heartistry',
       username: 'heartistry',
