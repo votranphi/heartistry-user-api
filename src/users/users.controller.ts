@@ -1,42 +1,44 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  HttpException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { SignUpDto } from './dto/sign-up.dto';
+import { User } from './entities/user.entity';
 
 @Controller('users')
+@UsePipes(
+  new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transformOptions: {
+        enableImplicitConversion: true,
+    },
+    errorHttpStatusCode: 400,
+  })
+)
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
-  }
+  @Post('signup')
+  async create(@Body() signUpDto: SignUpDto): Promise<User> {
+    if (await this.usersService.findUserByUsername(signUpDto.username)) {
+      throw new HttpException('Used Username', 400);
+    }
 
-  @Get()
-  findAll() {
-    return this.userService.findAllUser();
-  }
+    if (await this.usersService.findUserByEmail(signUpDto.email)) {
+      throw new HttpException('Used Email', 400);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.viewUser(+id);
-  }
+    if (await this.usersService.findUserByPhoneNumber(signUpDto.phoneNumber)) {
+      throw new HttpException('Used Phone Numer', 400);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.removeUser(+id);
+    return await this.usersService.createUser(signUpDto);
   }
 }

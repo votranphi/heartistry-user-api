@@ -1,49 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
   ) { }
 
-  createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(signUpDto: SignUpDto): Promise<User> {
     const user: User = new User();
-    user.name = createUserDto.name;
-    user.age = createUserDto.age;
-    user.email = createUserDto.email;
-    user.phoneNumber = createUserDto.phoneNumber;
-    user.username = createUserDto.username;
-    user.password = createUserDto.password;
-    user.gender = createUserDto.gender;
-    return this.userRepository.save(user);
+    user.fullname = signUpDto.fullname;
+    user.age = signUpDto.age;
+    user.email = signUpDto.email;
+    user.phoneNumber = signUpDto.phoneNumber;
+    user.username = signUpDto.username;
+    user.password = signUpDto.password;
+    user.gender = signUpDto.gender;
+
+    return await this.usersRepository.save(user);
   }
 
-  findAllUser(): Promise<User[]> {
-    return this.userRepository.find();
+  async findUserByUsername(username: string): Promise<User> {
+    return await this.usersRepository.findOne({
+      where: {
+        username: username
+      },
+    });
   }
 
-  viewUser(id: number): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+  async findUserByEmail(email: string): Promise<User> {
+    return await this.usersRepository.findOne({
+      where: {
+        email: email
+      },
+    });
   }
 
-  updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user: User = new User();
-    user.name = updateUserDto.name;
-    user.age = updateUserDto.age;
-    user.email = updateUserDto.email;
-    user.phoneNumber = updateUserDto.phoneNumber;
-    user.username = updateUserDto.username;
-    user.password = updateUserDto.password;
-    user.id = id;
-    return this.userRepository.save(user);
-  }
-
-  removeUser(id: number): Promise<{ affected?: number }> {
-    return this.userRepository.delete(id);
+  async findUserByPhoneNumber(phoneNumber: string): Promise<User> {
+    return await this.usersRepository.findOne({
+      where: {
+        phoneNumber: phoneNumber
+      },
+    });
   }
 }
