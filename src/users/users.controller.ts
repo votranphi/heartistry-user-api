@@ -5,10 +5,15 @@ import {
   HttpException,
   UsePipes,
   ValidationPipe,
+  Req,
+  Get,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { SignUpDto } from './dto/sign-up.dto';
-import { User } from './entities/user.entity';
+import { UserInfoDto } from './dto/user-info.dto';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { Request } from 'express';
 
 @Controller('users')
 @UsePipes(
@@ -26,7 +31,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('signup')
-  async create(@Body() signUpDto: SignUpDto): Promise<User> {
+  async create(@Body() signUpDto: SignUpDto): Promise<UserInfoDto> {
     if (await this.usersService.findUserByUsername(signUpDto.username)) {
       throw new HttpException('Used Username', 400);
     }
@@ -40,5 +45,11 @@ export class UsersController {
     }
 
     return await this.usersService.createUser(signUpDto);
+  }
+
+  @Get('')
+  @UseGuards(JwtAuthGuard)
+  async info(@Req() req: Request) {
+    return req.user;
   }
 }
