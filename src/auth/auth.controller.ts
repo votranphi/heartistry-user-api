@@ -6,8 +6,7 @@ import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
-    
+    constructor(private authService: AuthService) {}  
     @Post('token')
     @UseGuards(LocalGuard)
     async login(@Req() req: Request) {
