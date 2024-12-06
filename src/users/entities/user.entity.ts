@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class User {
@@ -6,7 +6,7 @@ export class User {
     id: number;
 
     @Column({ type: 'varchar', length: 30 })
-    name: string;
+    fullname: string;
 
     @Column({ type: 'varchar', length: 15 })
     username: string;
@@ -23,6 +23,15 @@ export class User {
     @Column({ type: 'varchar' })
     password: string;
 
-    @Column({ type: 'enum', enum: ['m', 'f', 'u'] }) // m - male, f - female, u - unspecified
+    @Column({ type: 'enum', enum: ['male', 'female', 'unspecified'] })
     gender: string;
+
+    @Column({ type: 'enum', enum: ['admin', 'user'], default: 'user' })
+    role: string;
+
+    @CreateDateColumn()
+    createAt: Date;
+
+    @UpdateDateColumn()
+    updateAt: Date;
 }
