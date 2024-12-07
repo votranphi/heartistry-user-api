@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { SignUpDto } from './dto/sign-up.dto';
 import { User } from './entities/user.entity';
 import { UserInfoDto } from './dto/user-info.dto';
+import { PasswordRecoveryDto } from './dto/password-recovery.dto';
+import { use } from 'passport';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +26,16 @@ export class UsersService {
     const {password, ...returnedUser} = await this.usersRepository.save(user);
 
     return returnedUser;
+  }
+
+  async updatePassword(username: string): Promise<string> {
+    const foundUser = await this.findUserByUsername(username);
+
+    foundUser.password = this.generateRandomString();
+
+    await this.usersRepository.update(foundUser.id, foundUser);
+
+    return foundUser.password;
   }
 
   async findUserByUsername(username: string): Promise<User> {
@@ -48,5 +60,17 @@ export class UsersService {
         phoneNumber: phoneNumber
       },
     });
+  }
+
+  generateRandomString(length: number = 8): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
   }
 }
