@@ -17,6 +17,7 @@ import { JwtGuard } from './guards/jwt.guard';
 import { MailService } from 'src/mail/mail.service';
 import { OtpsService } from 'src/otps/otps.service';
 import { OtpDto } from './dto/otp.dto';
+import { PasswordRecoveryDto } from './dto/password-recovery.dto';
 
 @Controller('users')
 export class UsersController {
@@ -63,7 +64,7 @@ export class UsersController {
 
     this.mailService.sendOtpVerificationCode(signUpDto.username, signUpDto.email, savedOtp.otp);
 
-    throw new HttpException('OTP Sent', HttpStatus.OK);
+    throw new HttpException('OTP Was Sent To Email', HttpStatus.OK);
   }
 
   @Post('otp_verification')
@@ -84,6 +85,29 @@ export class UsersController {
 
     const { otp, ...signUpDto } = otpDto;
     return await this.usersService.createUser(signUpDto);
+  }
+
+  @Post('password_recovery')
+    async passwordRecovery(@Body() passwordRecoveryDto: PasswordRecoveryDto): Promise<any> {
+      const foundUser = await this.usersService.findUserByUsername(passwordRecoveryDto.username);
+
+      if (!foundUser) {
+        throw new HttpException('User Not Found', HttpStatus.BAD_REQUEST);
+      }
+
+      if (foundUser.email !== passwordRecoveryDto.email) {
+        throw new HttpException('Wrong Email', HttpStatus.BAD_REQUEST);
+      }
+
+      if (foundUser.phoneNumber !== passwordRecoveryDto.phoneNumber) {
+        throw new HttpException('Wrong Phone Number', HttpStatus.BAD_REQUEST);
+      }
+
+      const newPassword = await this.usersService.updatePassword(passwordRecoveryDto.username);
+
+      this.mailService.sendPasswordRecovery(passwordRecoveryDto.username, passwordRecoveryDto.email, newPassword);
+
+      throw new HttpException('New Password Was Sent To Email', HttpStatus.OK);
   }
 
   @Get('')
