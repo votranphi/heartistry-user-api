@@ -12,8 +12,11 @@ import {
 import { UsersService } from './users.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UserInfoDto } from './dto/user-info.dto';
-import { JwtAuthGuard } from './guards/jwt.guard';
 import { Request } from 'express';
+import { JwtGuard } from './guards/jwt.guard';
+import { MailService } from 'src/mail/mail.service';
+import { OtpsService } from 'src/otps/otps.service';
+import { User } from './entities/user.entity';
 
 @Controller('users')
 @UsePipes(
@@ -28,7 +31,11 @@ import { Request } from 'express';
   })
 )
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly mailService: MailService,
+    private readonly otpsService: OtpsService,
+  ) {}
 
   @Post('signup')
   async create(@Body() signUpDto: SignUpDto): Promise<UserInfoDto> {
@@ -41,14 +48,18 @@ export class UsersController {
     }
 
     if (await this.usersService.findUserByPhoneNumber(signUpDto.phoneNumber)) {
-      throw new HttpException('Used Phone Numer', 400);
+      throw new HttpException('Used Phone Number', 400);
     }
+
+    const otp = await this.otpsService.createOtp(signUpDto.username);
+
+    this.mailService.sendOtpVerificationCode(signUpDto.username, signUpDto.email, otp.otp);
 
     return await this.usersService.createUser(signUpDto);
   }
 
   @Get('')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtGuard)
   async info(@Req() req: Request) {
     return req.user;
   }

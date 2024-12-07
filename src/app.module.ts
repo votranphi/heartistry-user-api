@@ -5,22 +5,34 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { OtpsModule } from './otps/otps.module';
+import { Otp } from './otps/entities/otp.entity';
+import { MailModule } from './mail/mail.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: '192.168.130.129',
-      port: 5432,
-      password: 'heartistry',
-      username: 'heartistry',
-      entities: [User],
-      database: 'heartistry',
-      synchronize: true,
-      logging: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: async (config: ConfigService) => ({
+        type: config.get<'mysql' | 'postgres' | 'sqlite'>('DB_TYPE'),
+        host: config.get<string>('DB_HOST'),
+        port: config.get<number>('DB_PORT'),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_DATABASE'),
+        entities: [User, Otp],
+        synchronize: true,
+        logging: true,
+      }),
+      inject: [ConfigService],
     }),
     UsersModule,
     AuthModule,
+    OtpsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
