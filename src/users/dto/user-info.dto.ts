@@ -9,7 +9,7 @@ export class UserInfoDto {
 
     phoneNumber: string;
 
-    age: number;
+    dob: Date;
 
     // password: string; // do not return the password
 

@@ -1,5 +1,6 @@
 import {
     IsAlphanumeric,
+    IsDate,
     IsEmail,
     IsEnum,
     IsInt,
@@ -33,8 +34,8 @@ export class SignUpDto {
     @IsPhoneNumber('VN', { message: 'Please enter a Vietnamese phone number.' })
     phoneNumber: string;
 
-    @IsInt()
-    age: number;
+    @IsDate()
+    dob: Date;
 
     @IsString()
     @IsEnum(['female', 'male', 'unspecified'])
