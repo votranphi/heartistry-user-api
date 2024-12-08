@@ -16,7 +16,7 @@ export class UsersService {
   async createUser(signUpDto: SignUpDto): Promise<UserInfoDto> {
     const user: User = new User();
     user.fullname = signUpDto.fullname;
-    user.age = signUpDto.age;
+    user.dob = signUpDto.dob;
     user.email = signUpDto.email;
     user.phoneNumber = signUpDto.phoneNumber;
     user.username = signUpDto.username;

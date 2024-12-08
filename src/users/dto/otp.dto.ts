@@ -7,7 +7,7 @@ export class OtpDto {
 
     phoneNumber: string;
 
-    age: number;
+    dob: Date;
 
     gender: string;
 
