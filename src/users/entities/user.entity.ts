@@ -17,8 +17,8 @@ export class User {
     @Column({ type: 'varchar', length: 10 })
     phoneNumber: string;
 
-    @Column({ type: 'int' })
-    age: number;
+    @Column({ type: 'date' })
+    dob: Date;
 
     @Column({ type: 'varchar' })
     password: string;
