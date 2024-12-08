@@ -62,6 +62,10 @@ export class UsersService {
     });
   }
 
+  async findAllUsers(): Promise<User[]> {
+    return await this.usersRepository.find();
+  }
+
   generateRandomString(length: number = 8): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';

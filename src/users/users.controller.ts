@@ -18,6 +18,7 @@ import { MailService } from 'src/mail/mail.service';
 import { OtpsService } from 'src/otps/otps.service';
 import { OtpDto } from './dto/otp.dto';
 import { PasswordRecoveryDto } from './dto/password-recovery.dto';
+import { AdminGuard } from './guards/admin.guard';
 
 @Controller('users')
 export class UsersController {
@@ -114,5 +115,11 @@ export class UsersController {
   @UseGuards(JwtGuard)
   async info(@Req() req: Request) {
     return req.user;
+  }
+
+  @Get('all')
+  @UseGuards(JwtGuard, AdminGuard)
+  async getAllUsers(@Req() req: Request) {
+    return await this.usersService.findAllUsers();
   }
 }
