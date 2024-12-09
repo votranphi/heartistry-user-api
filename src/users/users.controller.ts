@@ -42,15 +42,15 @@ export class UsersController {
   )
   async create(@Body() signUpDto: SignUpDto): Promise<any> {
     if (await this.usersService.findUserByUsername(signUpDto.username)) {
-      throw new HttpException('Used Username', 400);
+      throw new HttpException('Invalid username', 400);
     }
 
     if (await this.usersService.findUserByEmail(signUpDto.email)) {
-      throw new HttpException('Used Email', 400);
+      throw new HttpException('Invalid email', 400);
     }
 
     if (await this.usersService.findUserByPhoneNumber(signUpDto.phoneNumber)) {
-      throw new HttpException('Used Phone Number', 400);
+      throw new HttpException('Invalid phone number', 400);
     }
 
     const foundOtp = await this.otpsService.findOtpByUsername(signUpDto.username);
@@ -65,7 +65,7 @@ export class UsersController {
 
     this.mailService.sendOtpVerificationCode(signUpDto.username, signUpDto.email, savedOtp.otp);
 
-    throw new HttpException('OTP Was Sent To Email', HttpStatus.OK);
+    throw new HttpException('OTP was sent to your email', HttpStatus.OK);
   }
 
   @Post('otp_verification')
@@ -73,7 +73,7 @@ export class UsersController {
     const foundOtp = await this.otpsService.findOtpByUsername(otpDto.username);
 
     if (!foundOtp) {
-      throw new HttpException('OTP Not Found', HttpStatus.BAD_REQUEST);
+      throw new HttpException('OTP not found', HttpStatus.BAD_REQUEST);
     }
 
     if (foundOtp.otp !== otpDto.otp) {
@@ -81,7 +81,7 @@ export class UsersController {
     }
 
     if (foundOtp.expireTime <= Date.now() / 1000) {
-      throw new HttpException('OTP Expired', HttpStatus.BAD_REQUEST);
+      throw new HttpException('OTP expired', HttpStatus.BAD_REQUEST);
     }
 
     const { otp, ...signUpDto } = otpDto;
@@ -93,22 +93,22 @@ export class UsersController {
       const foundUser = await this.usersService.findUserByUsername(passwordRecoveryDto.username);
 
       if (!foundUser) {
-        throw new HttpException('User Not Found', HttpStatus.BAD_REQUEST);
+        throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
       }
 
       if (foundUser.email !== passwordRecoveryDto.email) {
-        throw new HttpException('Wrong Email', HttpStatus.BAD_REQUEST);
+        throw new HttpException('Wrong email', HttpStatus.BAD_REQUEST);
       }
 
       if (foundUser.phoneNumber !== passwordRecoveryDto.phoneNumber) {
-        throw new HttpException('Wrong Phone Number', HttpStatus.BAD_REQUEST);
+        throw new HttpException('Wrong phone number', HttpStatus.BAD_REQUEST);
       }
 
       const newPassword = await this.usersService.updatePassword(passwordRecoveryDto.username);
 
       this.mailService.sendPasswordRecovery(passwordRecoveryDto.username, passwordRecoveryDto.email, newPassword);
 
-      throw new HttpException('New Password Was Sent To Email', HttpStatus.OK);
+      throw new HttpException('New password was sent to your email', HttpStatus.OK);
   }
 
   @Get('')

@@ -3,7 +3,6 @@ import {
     IsDate,
     IsEmail,
     IsEnum,
-    IsInt,
     IsNotEmpty,
     IsPhoneNumber,
     IsString,
@@ -12,15 +11,16 @@ import {
 } from 'class-validator';
 
 const passwordRegEx = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+const emailRegEx = /^(?:[a-zA-Z]{1,}@gmail\.com|[12][0-9]52[0-9]{4}@gm\.uit\.edu\.vn)$/;
 
 export class SignUpDto {
     @IsString()
-    @MinLength(2, { message: 'Name must have atleast 2 characters.' })
+    @MinLength(2, { message: 'Name must have at least 2 characters.' })
     @IsNotEmpty()
     fullname: string;
 
     @IsNotEmpty()
-    @MinLength(3, { message: 'Username must have atleast 3 characters.' })
+    @MinLength(3, { message: 'Username must have at least 3 characters.' })
     @IsAlphanumeric(undefined, {
         message: 'Username does not allow other than alpha numeric chars.',
     })
@@ -28,6 +28,9 @@ export class SignUpDto {
 
     @IsNotEmpty()
     @IsEmail({}, { message: 'Please provide valid Email.' })
+    @Matches(emailRegEx, {
+        message: "Email's postfix must be @gmail.com or @gm.uit.edu.vn",
+    })
     email: string;
 
     @IsNotEmpty()
@@ -44,7 +47,7 @@ export class SignUpDto {
     @IsString()
     @IsNotEmpty()
     @Matches(passwordRegEx, {
-        message: 'Password must contain minimum eight characters, at least one letter, one number and one special character',
+        message: 'Password must contain at least eight characters, one letter, one number and one special character',
     })
     password: string;
 }
