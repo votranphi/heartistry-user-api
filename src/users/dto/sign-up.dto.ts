@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 
 const passwordRegEx = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-const emailRegEx = /^(?:[a-zA-Z0-9]{1,}@gmail\.com|[12][0-9]52[0-9]{4}@gm\.uit\.edu\.vn)$/;
+const emailRegEx = /^(?:[a-zA-Z0-9.]{1,}@gmail\.com|[12][0-9]52[0-9]{4}@gm\.uit\.edu\.vn)$/;
 
 export class SignUpDto {
     @IsString()
