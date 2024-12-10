@@ -24,7 +24,7 @@ import { OtpDto } from './dto/otp.dto';
 import { PasswordRecoveryDto } from './dto/password-recovery.dto';
 import { AdminGuard } from './guards/admin.guard';
 import { User } from './entities/user.entity';
-import { ApiBadRequestResponse, ApiForbiddenResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiForbiddenResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -33,8 +33,11 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly mailService: MailService,
     private readonly otpsService: OtpsService,
-  ) {}
+  ) { }
 
+  @ApiOperation({
+    summary: 'Sign up new account and get OTP'
+  })
   @ApiBadRequestResponse({
     description: 'Username, email, password have been used or invalid',
     example: new BadRequestException('Message').getResponse()
@@ -53,7 +56,7 @@ export class UsersController {
       whitelist: true,
       forbidNonWhitelisted: true,
       transformOptions: {
-          enableImplicitConversion: true,
+        enableImplicitConversion: true,
       },
       errorHttpStatusCode: 400,
     })
@@ -89,6 +92,9 @@ export class UsersController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Verify received OTP'
+  })
   @ApiBadRequestResponse({
     description: 'OTP was not found, incorrect or expired',
     example: new BadRequestException('Message').getResponse()
@@ -129,31 +135,34 @@ export class UsersController {
     }
   })
   @Post('password_recovery')
-    async passwordRecovery(@Body() passwordRecoveryDto: PasswordRecoveryDto): Promise<any> {
-      const foundUser = await this.usersService.findUserByUsername(passwordRecoveryDto.username);
+  async passwordRecovery(@Body() passwordRecoveryDto: PasswordRecoveryDto): Promise<any> {
+    const foundUser = await this.usersService.findUserByUsername(passwordRecoveryDto.username);
 
-      if (!foundUser) {
-        throw new BadRequestException('User not found');
-      }
+    if (!foundUser) {
+      throw new BadRequestException('User not found');
+    }
 
-      if (foundUser.email !== passwordRecoveryDto.email) {
-        throw new BadRequestException('Wrong email');
-      }
+    if (foundUser.email !== passwordRecoveryDto.email) {
+      throw new BadRequestException('Wrong email');
+    }
 
-      if (foundUser.phoneNumber !== passwordRecoveryDto.phoneNumber) {
-        throw new BadRequestException('Wrong phone number');
-      }
+    if (foundUser.phoneNumber !== passwordRecoveryDto.phoneNumber) {
+      throw new BadRequestException('Wrong phone number');
+    }
 
-      const newPassword = await this.usersService.updatePassword(passwordRecoveryDto.username);
+    const newPassword = await this.usersService.updatePassword(passwordRecoveryDto.username);
 
-      this.mailService.sendPasswordRecovery(passwordRecoveryDto.username, passwordRecoveryDto.email, newPassword);
+    this.mailService.sendPasswordRecovery(passwordRecoveryDto.username, passwordRecoveryDto.email, newPassword);
 
-      return {
-        message: 'New password was sent to your email',
-        statusCode: HttpStatus.OK,
-      };
+    return {
+      message: 'New password was sent to your email',
+      statusCode: HttpStatus.OK,
+    };
   }
 
+  @ApiOperation({
+    summary: 'Get your information'
+  })
   @ApiOkResponse({
     description: "Get account's information successfully",
     type: User
@@ -169,6 +178,9 @@ export class UsersController {
     return await this.usersService.findUserByUsername(username);
   }
 
+  @ApiOperation({
+    summary: "Get all users' information (Admin only)"
+  })
   @ApiOkResponse({
     description: "Get all users account information successfully",
     type: [User]
