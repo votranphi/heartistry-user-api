@@ -8,10 +8,9 @@ async function bootstrap() {
 
   // create swagger document
   const config = new DocumentBuilder()
-    .setTitle('Heatistry API endpoints')
-    .setDescription('API for Heartistry - an English vocabulary learning website')
+    .setTitle('Heartistry User/Auth API Documentation')
+    .setDescription('RESTful API for Heartistry (user management and authentication)')
     .setVersion('1.0')
-    .addTag('heartistry')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
