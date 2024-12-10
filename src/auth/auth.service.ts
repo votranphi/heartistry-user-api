@@ -15,10 +15,7 @@ export class AuthService {
 
         if (password === foundUser.password) {
             const { password, fullname, email, phoneNumber, dob, gender, createAt, updateAt, ...user } = foundUser;
-            throw new HttpException(
-                { access_token: this.jwtService.sign(user) },
-                HttpStatus.OK
-            );
+            return { access_token: this.jwtService.sign(user) };
         }
 
         return null;

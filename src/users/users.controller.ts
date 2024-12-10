@@ -9,6 +9,8 @@ import {
   Get,
   UseGuards,
   HttpStatus,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -19,7 +21,9 @@ import { OtpsService } from 'src/otps/otps.service';
 import { OtpDto } from './dto/otp.dto';
 import { PasswordRecoveryDto } from './dto/password-recovery.dto';
 import { AdminGuard } from './guards/admin.guard';
+import { User } from './entities/user.entity';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -40,7 +44,7 @@ export class UsersController {
       errorHttpStatusCode: 400,
     })
   )
-  async create(@Body() signUpDto: SignUpDto): Promise<any> {
+  async create(@Body() signUpDto: SignUpDto): Promise<HttpException> {
     if (await this.usersService.findUserByUsername(signUpDto.username)) {
       throw new HttpException('Invalid username', 400);
     }
@@ -69,7 +73,7 @@ export class UsersController {
   }
 
   @Post('otp_verification')
-  async otpVerification(@Body() otpDto: OtpDto): Promise<any> {
+  async otpVerification(@Body() otpDto: OtpDto): Promise<User> {
     const foundOtp = await this.otpsService.findOtpByUsername(otpDto.username);
 
     if (!foundOtp) {
@@ -89,7 +93,7 @@ export class UsersController {
   }
 
   @Post('password_recovery')
-    async passwordRecovery(@Body() passwordRecoveryDto: PasswordRecoveryDto): Promise<any> {
+    async passwordRecovery(@Body() passwordRecoveryDto: PasswordRecoveryDto): Promise<HttpException> {
       const foundUser = await this.usersService.findUserByUsername(passwordRecoveryDto.username);
 
       if (!foundUser) {
@@ -113,13 +117,14 @@ export class UsersController {
 
   @Get('me')
   @UseGuards(JwtGuard)
-  async info(@Req() req: Request) {
-    return req.user;
+  async info(@Req() req: Request): Promise<User> {
+    const { username } = req.user as { id: number; username: string; role: string };
+    return await this.usersService.findUserByUsername(username);
   }
 
   @Get('all')
   @UseGuards(JwtGuard, AdminGuard)
-  async getAllUsers() {
+  async getAllUsers(): Promise<User[]> {
     return await this.usersService.findAllUsers();
   }
 }
