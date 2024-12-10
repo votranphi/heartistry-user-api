@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
     IsAlphanumeric,
     IsDate,
@@ -14,11 +15,19 @@ const passwordRegEx = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]
 const emailRegEx = /^(?:[a-zA-Z0-9.]{1,}@gmail\.com|[12][0-9]52[0-9]{4}@gm\.uit\.edu\.vn)$/;
 
 export class SignUpDto {
+    @ApiProperty({
+        description: 'Fullname of the user',
+        example: 'Nguyen Van A'
+    })
     @IsString()
     @MinLength(2, { message: 'Name must have at least 2 characters.' })
     @IsNotEmpty()
     fullname: string;
 
+    @ApiProperty({
+        description: 'Username of the user',
+        example: 'nguyenvana'
+    })
     @IsNotEmpty()
     @MinLength(3, { message: 'Username must have at least 3 characters.' })
     @IsAlphanumeric(undefined, {
@@ -26,6 +35,10 @@ export class SignUpDto {
     })
     username: string;
 
+    @ApiProperty({
+        description: 'Email of the user',
+        example: 'nguyenvana@gmail.com'
+    })
     @IsNotEmpty()
     @IsEmail({}, { message: 'Please provide valid Email.' })
     @Matches(emailRegEx, {
@@ -33,17 +46,33 @@ export class SignUpDto {
     })
     email: string;
 
+    @ApiProperty({
+        description: 'Phone number of the user',
+        example: '0909009009'
+    })
     @IsNotEmpty()
-    @IsPhoneNumber('VN', { message: 'Please enter a Vietnamese phone number.' })
+    @IsPhoneNumber('VN', { message: 'Please enter a Vietnamese .' })
     phoneNumber: string;
 
+    @ApiProperty({
+        description: 'Date of birth of the user',
+        example: '2004-12-29'
+    })
     @IsDate()
     dob: Date;
 
+    @ApiProperty({
+        description: 'Gender of the user',
+        example: 'male'
+    })
     @IsString()
     @IsEnum(['female', 'male', 'unspecified'])
     gender: string;
 
+    @ApiProperty({
+        description: 'Password of the user',
+        example: '09090090009'
+    })
     @IsString()
     @IsNotEmpty()
     @Matches(passwordRegEx, {

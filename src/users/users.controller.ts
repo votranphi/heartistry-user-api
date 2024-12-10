@@ -111,7 +111,7 @@ export class UsersController {
       throw new HttpException('New password was sent to your email', HttpStatus.OK);
   }
 
-  @Get('')
+  @Get('me')
   @UseGuards(JwtGuard)
   async info(@Req() req: Request) {
     return req.user;
@@ -119,7 +119,7 @@ export class UsersController {
 
   @Get('all')
   @UseGuards(JwtGuard, AdminGuard)
-  async getAllUsers(@Req() req: Request) {
+  async getAllUsers() {
     return await this.usersService.findAllUsers();
   }
 }
