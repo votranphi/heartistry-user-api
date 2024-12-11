@@ -24,7 +24,7 @@ import { OtpDto } from './dto/otp.dto';
 import { PasswordRecoveryDto } from './dto/password-recovery.dto';
 import { AdminGuard } from './guards/admin.guard';
 import { User } from './entities/user.entity';
-import { ApiBadRequestResponse, ApiForbiddenResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -171,6 +171,7 @@ export class UsersController {
     description: 'Access token was not given',
     example: new UnauthorizedException().getResponse()
   })
+  @ApiBearerAuth()
   @Get('me')
   @UseGuards(JwtGuard)
   async info(@Req() req: Request): Promise<User> {
@@ -193,6 +194,7 @@ export class UsersController {
     description: "Given token wasn't from an admin",
     example: new ForbiddenException("Access denied: Admins only").getResponse()
   })
+  @ApiBearerAuth()
   @Get('all')
   @UseGuards(JwtGuard, AdminGuard)
   async getAllUsers(): Promise<User[]> {
