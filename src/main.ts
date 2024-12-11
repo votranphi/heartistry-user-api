@@ -11,6 +11,7 @@ async function bootstrap() {
     .setTitle('Heartistry User/Auth API Documentation')
     .setDescription('RESTful API for Heartistry (user management and authentication)')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
