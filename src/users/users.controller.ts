@@ -123,6 +123,9 @@ export class UsersController {
     return await this.usersService.createUser(signUpDto);
   }
 
+  @ApiOperation({
+    summary: "Resend new password to user's email"
+  })
   @ApiBadRequestResponse({
     description: 'User was not found, wrong email or wrong phone number',
     example: new BadRequestException('Message').getResponse()
