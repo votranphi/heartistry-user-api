@@ -17,7 +17,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
 
   app.enableCors();
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(3030);
 
   // allow hot module
   if (module.hot) {
