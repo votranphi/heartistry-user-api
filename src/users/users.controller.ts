@@ -96,7 +96,7 @@ export class UsersController {
     summary: 'Verify received OTP'
   })
   @ApiBadRequestResponse({
-    description: 'OTP was not found, incorrect or expired',
+    description: "OTP was not found, incorrect, or username's taken",
     example: new BadRequestException('Message').getResponse()
   })
   @ApiOkResponse({
