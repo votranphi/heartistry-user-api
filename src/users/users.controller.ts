@@ -107,6 +107,12 @@ export class UsersController {
   async otpVerification(@Body() otpDto: OtpDto): Promise<any> {
     const foundOtp = await this.otpsService.findOtpByUsername(otpDto.username);
 
+    const foundUser = await this.usersService.findUserByUsername(otpDto.username);
+
+    if (foundUser) {
+      throw new BadRequestException("Username's already taken");
+    }
+
     if (!foundOtp) {
       throw new BadRequestException('OTP not found');
     }
