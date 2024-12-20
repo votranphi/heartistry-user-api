@@ -360,6 +360,14 @@ export class UsersController {
 
 
   @ApiBearerAuth()
+  @ApiUnauthorizedResponse({
+    description: 'Access token was not given or old password was incorrect',
+    example: new UnauthorizedException().getResponse()
+  })
+  @ApiOkResponse({
+    description: "Change password successfully",
+    type: User
+  })
   @UsePipes(
     new ValidationPipe({
       transform: true,
@@ -376,6 +384,12 @@ export class UsersController {
   async updatePassword(@Req() req: Request, @Body() passwordDto: PasswordDto): Promise<User> {
     const { id } = req.user as { id: number; username: string; role: string };
 
-    return await this.usersService.updatePassword(id, passwordDto.password);
+    const user = await this.usersService.findUserById(id);
+
+    if (user.password !== passwordDto.password) {
+      throw new UnauthorizedException('Old password is incorrect');
+    }
+
+    return await this.usersService.updatePassword(id, passwordDto.newPassword);
   }
 }

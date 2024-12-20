@@ -9,4 +9,11 @@ export class PasswordDto {
         message: 'Password must contain at least eight characters, one letter, one number and one special character',
     })
     password: string
+
+    @IsString()
+    @IsNotEmpty()
+    @Matches(passwordRegEx, {
+        message: 'Password must contain at least eight characters, one letter, one number and one special character',
+    })
+    newPassword: string
 }
