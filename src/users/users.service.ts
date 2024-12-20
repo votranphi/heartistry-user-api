@@ -75,7 +75,6 @@ export class UsersService {
     const foundUser = await this.findUserById(id);
 
     foundUser.fullname = updateDto.fullname;
-    foundUser.username = updateDto.username;
     foundUser.email = updateDto.email;
     foundUser.phoneNumber = updateDto.phoneNumber;
     foundUser.dob = updateDto.dob;

@@ -8,12 +8,6 @@ export class UpdateDto {
     fullname: string;
 
     @ApiProperty({
-        description: 'Username of the user',
-        example: 'nguyenvana'
-    })
-    username: string;
-
-    @ApiProperty({
         description: 'Email of the user',
         example: 'nguyenvana@gmail.com'
     })

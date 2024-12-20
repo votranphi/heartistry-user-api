@@ -247,10 +247,6 @@ export class UsersController {
   @Patch('me')
   @UseGuards(JwtGuard)
   async updateMyInformation(@Req() req: Request, @Body() updateDto: UpdateDto): Promise<User> {
-    if (await this.usersService.findUserByUsername(updateDto.username)) {
-      throw new BadRequestException('Existed username');
-    }
-
     if (await this.usersService.findUserByEmail(updateDto.email)) {
       throw new BadRequestException('Existed email');
     }
