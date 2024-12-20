@@ -51,7 +51,7 @@ export class SignUpDto {
         example: '0909009009'
     })
     @IsNotEmpty()
-    @IsPhoneNumber('VN', { message: 'Please enter a Vietnamese .' })
+    @IsPhoneNumber('VN', { message: 'Please enter a Vietnamese phone number .' })
     phoneNumber: string;
 
     @ApiProperty({

@@ -31,6 +31,7 @@ import { User } from './entities/user.entity';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { UpdateDto } from './dto/update.dto';
 import { AdminUpdateDto } from './dto/admin-update.dto';
+import { PasswordDto } from './dto/password.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -57,7 +58,6 @@ export class UsersController {
       statusCode: HttpStatus.OK,
     }
   })
-  @Post('signup')
   @UsePipes(
     new ValidationPipe({
       transform: true,
@@ -69,6 +69,7 @@ export class UsersController {
       errorHttpStatusCode: 400,
     })
   )
+  @Post('signup')
   async create(@Body() signUpDto: SignUpDto): Promise<any> {
     if (await this.usersService.findUserByUsername(signUpDto.username)) {
       throw new BadRequestException('Existed username');
@@ -171,7 +172,7 @@ export class UsersController {
       throw new BadRequestException('Wrong phone number');
     }
 
-    const newPassword = await this.usersService.updatePassword(passwordRecoveryDto.username);
+    const newPassword = await this.usersService.updatePasswordRandomly(passwordRecoveryDto.username);
 
     this.mailService.sendPasswordRecovery(passwordRecoveryDto.username, passwordRecoveryDto.email, newPassword);
 
@@ -244,6 +245,17 @@ export class UsersController {
     example: new UnauthorizedException().getResponse()
   })
   @ApiBearerAuth()
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      errorHttpStatusCode: 400,
+    })
+  )
   @Patch('me')
   @UseGuards(JwtGuard)
   async updateMyInformation(@Req() req: Request, @Body() updateDto: UpdateDto): Promise<User> {
@@ -281,6 +293,17 @@ export class UsersController {
     example: new ForbiddenException("Access denied: Admins only").getResponse()
   })
   @ApiBearerAuth()
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      errorHttpStatusCode: 400,
+    })
+  )
   @Patch(':id')
   @UseGuards(JwtGuard, AdminGuard)
   async updateUsersInformation(@Param('id') id: number, @Body() adminUpdateDto: AdminUpdateDto): Promise<User> {
@@ -332,5 +355,27 @@ export class UsersController {
 
     await this.usersService.deleteUserById(id);
     return user;
+  }
+
+
+
+  @ApiBearerAuth()
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      errorHttpStatusCode: 400,
+    })
+  )
+  @Post('password')
+  @UseGuards(JwtGuard)
+  async updatePassword(@Req() req: Request, @Body() passwordDto: PasswordDto): Promise<User> {
+    const { id } = req.user as { id: number; username: string; role: string };
+
+    return await this.usersService.updatePassword(id, passwordDto.password);
   }
 }

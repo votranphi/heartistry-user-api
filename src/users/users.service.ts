@@ -25,7 +25,7 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async updatePassword(username: string): Promise<string> {
+  async updatePasswordRandomly(username: string): Promise<string> {
     const foundUser = await this.findUserByUsername(username);
 
     foundUser.password = this.generateRandomString();
@@ -33,6 +33,16 @@ export class UsersService {
     await this.usersRepository.update(foundUser.id, foundUser);
 
     return foundUser.password;
+  }
+
+  async updatePassword(id: number, password: string): Promise<User> {
+    const foundUser = await this.findUserById(id);
+
+    foundUser.password = password;
+
+    await this.usersRepository.update(id, foundUser);
+
+    return foundUser;
   }
 
   async findUserById(id: number): Promise<User> {
