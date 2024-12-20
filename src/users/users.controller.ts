@@ -13,6 +13,10 @@ import {
   BadRequestException,
   UnauthorizedException,
   ForbiddenException,
+  Patch,
+  Param,
+  Delete,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -24,7 +28,9 @@ import { OtpDto } from './dto/otp.dto';
 import { PasswordRecoveryDto } from './dto/password-recovery.dto';
 import { AdminGuard } from './guards/admin.guard';
 import { User } from './entities/user.entity';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { UpdateDto } from './dto/update.dto';
+import { AdminUpdateDto } from './dto/admin-update.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -34,6 +40,8 @@ export class UsersController {
     private readonly mailService: MailService,
     private readonly otpsService: OtpsService,
   ) { }
+
+
 
   @ApiOperation({
     summary: 'Sign up new account and get OTP'
@@ -63,15 +71,15 @@ export class UsersController {
   )
   async create(@Body() signUpDto: SignUpDto): Promise<any> {
     if (await this.usersService.findUserByUsername(signUpDto.username)) {
-      throw new BadRequestException('Invalid username');
+      throw new BadRequestException('Existed username');
     }
 
     if (await this.usersService.findUserByEmail(signUpDto.email)) {
-      throw new BadRequestException('Invalid email');
+      throw new BadRequestException('Existed email');
     }
 
     if (await this.usersService.findUserByPhoneNumber(signUpDto.phoneNumber)) {
-      throw new BadRequestException('Invalid phone number');
+      throw new BadRequestException('Existed phone number');
     }
 
     const foundOtp = await this.otpsService.findOtpByUsername(signUpDto.username);
@@ -91,6 +99,8 @@ export class UsersController {
       statusCode: HttpStatus.OK,
     };
   }
+
+
 
   @ApiOperation({
     summary: 'Verify received OTP'
@@ -128,6 +138,8 @@ export class UsersController {
     const { otp, ...signUpDto } = otpDto;
     return await this.usersService.createUser(signUpDto);
   }
+
+
 
   @ApiOperation({
     summary: "Resend new password to user's email"
@@ -169,6 +181,8 @@ export class UsersController {
     };
   }
 
+
+
   @ApiOperation({
     summary: 'Get your information'
   })
@@ -184,9 +198,11 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtGuard)
   async info(@Req() req: Request): Promise<User> {
-    const { username } = req.user as { id: number; username: string; role: string };
-    return await this.usersService.findUserByUsername(username);
+    const { id } = req.user as { id: number; username: string; role: string };
+    return await this.usersService.findUserById(id);
   }
+
+
 
   @ApiOperation({
     summary: "Get all users' information (Admin only)"
@@ -208,5 +224,117 @@ export class UsersController {
   @UseGuards(JwtGuard, AdminGuard)
   async getAllUsers(): Promise<User[]> {
     return await this.usersService.findAllUsers();
+  }
+
+
+
+  @ApiOperation({
+    summary: "Update user's information"
+  })
+  @ApiOkResponse({
+    description: "Update user's information successfully",
+    type: User
+  })
+  @ApiBadRequestResponse({
+    description: 'Username, email, password have been used or invalid',
+    example: new BadRequestException('Message').getResponse()
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token was not given',
+    example: new UnauthorizedException().getResponse()
+  })
+  @ApiBearerAuth()
+  @Patch('me')
+  @UseGuards(JwtGuard)
+  async updateMyInformation(@Req() req: Request, @Body() updateDto: UpdateDto): Promise<User> {
+    if (await this.usersService.findUserByUsername(updateDto.username)) {
+      throw new BadRequestException('Existed username');
+    }
+
+    if (await this.usersService.findUserByEmail(updateDto.email)) {
+      throw new BadRequestException('Existed email');
+    }
+
+    if (await this.usersService.findUserByPhoneNumber(updateDto.phoneNumber)) {
+      throw new BadRequestException('Existed phone number');
+    }
+
+    const { id } = req.user as { id: number; username: string; role: string };
+    return await this.usersService.updateUserInformation(id, updateDto);
+  }
+
+
+
+  @ApiOperation({
+    summary: "Update user's information (Admin only)"
+  })
+  @ApiOkResponse({
+    description: "Update user's information successfully",
+    type: User
+  })
+  @ApiBadRequestResponse({
+    description: 'Username, email, password have been used or invalid',
+    example: new BadRequestException('Message').getResponse()
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token was not given',
+    example: new UnauthorizedException().getResponse()
+  })
+  @ApiForbiddenResponse({
+    description: "Given token wasn't from an admin",
+    example: new ForbiddenException("Access denied: Admins only").getResponse()
+  })
+  @ApiBearerAuth()
+  @Patch(':id')
+  @UseGuards(JwtGuard, AdminGuard)
+  async updateUsersInformation(@Param('id') id: number, @Body() adminUpdateDto: AdminUpdateDto): Promise<User> {
+    if (await this.usersService.findUserByUsername(adminUpdateDto.username)) {
+      throw new BadRequestException('Existed username');
+    }
+
+    if (await this.usersService.findUserByEmail(adminUpdateDto.email)) {
+      throw new BadRequestException('Existed email');
+    }
+
+    if (await this.usersService.findUserByPhoneNumber(adminUpdateDto.phoneNumber)) {
+      throw new BadRequestException('Existed phone number');
+    }
+
+    return await this.usersService.updateUserInformationForAdmin(id, adminUpdateDto);
+  }
+
+
+
+  @ApiOperation({
+    summary: "Delete user's account (Admin only)"
+  })
+  @ApiOkResponse({
+    description: "Delete user's account successfully",
+    type: User
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    example: new NotFoundException('User not found').getResponse()
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token was not given',
+    example: new UnauthorizedException().getResponse()
+  })
+  @ApiForbiddenResponse({
+    description: "Given token wasn't from an admin",
+    example: new ForbiddenException("Access denied: Admins only").getResponse()
+  })
+  @ApiBearerAuth()
+  @Delete(':id')
+  @UseGuards(JwtGuard, AdminGuard)
+  async deleteUserAccount(@Param('id') id: number): Promise<User> {
+    const user = await this.usersService.findUserById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.usersService.deleteUserById(id);
+    return user;
   }
 }

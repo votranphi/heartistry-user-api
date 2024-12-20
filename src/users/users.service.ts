@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SignUpDto } from './dto/sign-up.dto';
 import { User } from './entities/user.entity';
+import { UpdateDto } from './dto/update.dto';
+import { AdminUpdateDto } from './dto/admin-update.dto';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +35,14 @@ export class UsersService {
     return foundUser.password;
   }
 
+  async findUserById(id: number): Promise<User> {
+    return await this.usersRepository.findOne({
+      where: {
+        id: id
+      },
+    });
+  }
+
   async findUserByUsername(username: string): Promise<User> {
     return await this.usersRepository.findOne({
       where: {
@@ -59,6 +69,41 @@ export class UsersService {
 
   async findAllUsers(): Promise<User[]> {
     return await this.usersRepository.find();
+  }
+
+  async updateUserInformation(id: number, updateDto: UpdateDto): Promise<User> {
+    const foundUser = await this.findUserById(id);
+
+    foundUser.fullname = updateDto.fullname;
+    foundUser.username = updateDto.username;
+    foundUser.email = updateDto.email;
+    foundUser.phoneNumber = updateDto.phoneNumber;
+    foundUser.dob = updateDto.dob;
+    foundUser.gender = updateDto.gender;
+
+    await this.usersRepository.update(id, foundUser);
+
+    return foundUser;
+  }
+
+  async updateUserInformationForAdmin(id: number, adminUpdateDto: AdminUpdateDto): Promise<User> {
+    const foundUser = await this.findUserById(id);
+
+    foundUser.fullname = adminUpdateDto.fullname;
+    foundUser.username = adminUpdateDto.username;
+    foundUser.email = adminUpdateDto.email;
+    foundUser.phoneNumber = adminUpdateDto.phoneNumber;
+    foundUser.dob = adminUpdateDto.dob;
+    foundUser.gender = adminUpdateDto.gender;
+    foundUser.role = adminUpdateDto.role;
+
+    await this.usersRepository.update(id, foundUser);
+
+    return foundUser;
+  }
+
+  async deleteUserById(id: number) {
+    this.usersRepository.delete(id);
   }
 
   generateRandomString(length: number = 8): string {
