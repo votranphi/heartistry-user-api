@@ -62,6 +62,13 @@ export class User {
     role: string;
 
     @ApiProperty({
+        description: "Avatar's url of the user",
+        example: 'https://example.com/ex.png'
+    })
+    @Column({ type: 'varchar', default: '' })
+    avatarUrl: string;
+
+    @ApiProperty({
         description: 'Create day of the account',
         example: new Date()
     })

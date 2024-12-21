@@ -32,6 +32,7 @@ import { ApiBadRequestResponse, ApiBearerAuth, ApiForbiddenResponse, ApiNotFound
 import { UpdateDto } from './dto/update.dto';
 import { AdminUpdateDto } from './dto/admin-update.dto';
 import { PasswordDto } from './dto/password.dto';
+import { AvatarDto } from './dto/avatar.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -391,5 +392,19 @@ export class UsersController {
     }
 
     return await this.usersService.updatePassword(id, passwordDto.newPassword);
+  }
+
+
+
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description: "Change avatar successfully",
+    type: User
+  })
+  @Post('avatar')
+  @UseGuards(JwtGuard)
+  async updateAvatar(@Req() req: Request, @Body() avatarDto: AvatarDto): Promise<User> {
+    const { id } = req.user as { id: number; username: string; role: string };
+    return await this.usersService.updateAvatar(id, avatarDto);
   }
 }
