@@ -5,6 +5,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { User } from './entities/user.entity';
 import { UpdateDto } from './dto/update.dto';
 import { AdminUpdateDto } from './dto/admin-update.dto';
+import { AvatarDto } from './dto/avatar.dto';
 
 @Injectable()
 export class UsersService {
@@ -39,6 +40,16 @@ export class UsersService {
     const foundUser = await this.findUserById(id);
 
     foundUser.password = password;
+
+    await this.usersRepository.update(id, foundUser);
+
+    return foundUser;
+  }
+
+  async updateAvatar(id: number, avatarDto: AvatarDto): Promise<User> {
+    const foundUser = await this.findUserById(id);
+
+    foundUser.avatarUrl = avatarDto.avatarUrl;
 
     await this.usersRepository.update(id, foundUser);
 
