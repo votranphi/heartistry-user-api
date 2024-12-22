@@ -9,17 +9,17 @@ export class AuditLogsService {
         @InjectRepository(AuditLog) private readonly auditLogsRepository: Repository<AuditLog>, 
     ) {}
 
-    async save({ action, entity, entityId, userId, username, role, ipAddress, details }: AuditLog): Promise<AuditLog> {
+    async save(auditLog): Promise<AuditLog> {
         const savedAuditLog = new AuditLog();
 
-        savedAuditLog.action = action;
-        savedAuditLog.entity = entity;
-        savedAuditLog.entityId = entityId;
-        savedAuditLog.userId = userId;
-        savedAuditLog.username = username;
-        savedAuditLog.role = role;
-        savedAuditLog.ipAddress = ipAddress;
-        savedAuditLog.details = details;
+        savedAuditLog.action = auditLog.action;
+        savedAuditLog.entity = auditLog.entity;
+        savedAuditLog.entityId = auditLog.entityId;
+        savedAuditLog.userId = auditLog.userId;
+        savedAuditLog.username = auditLog.username;
+        savedAuditLog.role = auditLog.role;
+        savedAuditLog.ipAddress = auditLog.ipAddress;
+        savedAuditLog.details = auditLog.details;
 
         return await this.auditLogsRepository.save(savedAuditLog);
     }

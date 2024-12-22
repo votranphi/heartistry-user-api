@@ -12,28 +12,28 @@ export class AuditLog {
         example: 'CREATE'
     })
     @Column({ type: 'varchar' })
-    action: string;
+    action: string; // 'CREATE', 'UPDATE', 'DELETE', 'SIGNUP', 'LOGIN',...
 
     @ApiProperty({
         description: 'Entity has been affected',
         example: 'User'
     })
     @Column({ type: 'varchar' })
-    entity: string;
+    entity: string; // 'User', 'Otp',...
 
     @ApiProperty({
         description: "Entity's ID",
         example: 123
     })
     @Column({ type: 'int' })
-    entityId: number;
+    entityId: number; // -1: unknown,...
 
     @ApiProperty({
         description: "ID of the user who made the change",
         example: 100
     })
     @Column({ type: 'int' })
-    userId: number;
+    userId: number; // -1: unknown,...
 
     @ApiProperty({
         description: "Username of the user who made the change",
@@ -47,20 +47,20 @@ export class AuditLog {
         example: 'admin'
     })
     @Column({ type: 'varchar' })
-    role: string;
+    role: string; // 'user', 'admin'
 
     @ApiProperty({
         description: "IP address of the user who made the change",
         example: 100
     })
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'varchar' })
     ipAddress: string;
     
     @ApiProperty({
         description: "Details of the changes",
         example: 100
     })
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'varchar' })
     details: string;
 
     @ApiProperty({
