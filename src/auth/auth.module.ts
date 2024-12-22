@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from 'src/users/users.module';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -20,6 +19,6 @@ import { AuditLogsModule } from 'src/audit-logs/audit-logs.module';
     AuditLogsModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy]
+  providers: [LocalStrategy]
 })
 export class AuthModule {}

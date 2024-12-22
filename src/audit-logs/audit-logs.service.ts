@@ -23,4 +23,8 @@ export class AuditLogsService {
 
         return await this.auditLogsRepository.save(savedAuditLog);
     }
+
+    async getAllAuditLogs() {
+        return await this.auditLogsRepository.find();
+    }
 }
