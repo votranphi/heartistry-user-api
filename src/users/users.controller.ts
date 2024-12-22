@@ -359,6 +359,10 @@ export class UsersController {
   @Patch(':id')
   @UseGuards(JwtGuard, AdminGuard)
   async updateUsersInformation(@Req() req: Request, @Param('id') id: number, @Body() adminUpdateDto: AdminUpdateDto): Promise<User> {
+    if (!(await this.usersService.findUserById(id))) {
+      throw new NotFoundException('User not found');
+    }
+
     if (await this.usersService.findUserByUsername(adminUpdateDto.username)) {
       throw new BadRequestException('Existed username');
     }
