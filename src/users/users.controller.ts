@@ -33,6 +33,7 @@ import { UpdateDto } from './dto/update.dto';
 import { AdminUpdateDto } from './dto/admin-update.dto';
 import { PasswordDto } from './dto/password.dto';
 import { AvatarDto } from './dto/avatar.dto';
+import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -41,6 +42,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly mailService: MailService,
     private readonly otpsService: OtpsService,
+    private readonly auditLogsService: AuditLogsService,
   ) { }
 
 
@@ -71,7 +73,7 @@ export class UsersController {
     })
   )
   @Post('signup')
-  async create(@Body() signUpDto: SignUpDto): Promise<any> {
+  async create(@Req() req: Request, @Body() signUpDto: SignUpDto): Promise<any> {
     if (await this.usersService.findUserByUsername(signUpDto.username)) {
       throw new BadRequestException('Existed username');
     }
@@ -96,6 +98,17 @@ export class UsersController {
 
     this.mailService.sendOtpVerificationCode(signUpDto.username, signUpDto.email, savedOtp.otp);
 
+    // make audit log
+    this.auditLogsService.save({
+      action: "SIGNUP",
+      entity: "User",
+      entityId: -1,
+      userId: -1,
+      username: signUpDto.username,
+      role: "user",
+      details: "A user has been signed up and waiting for email verification",
+    });
+
     return {
       message: 'OTP was sent to your email',
       statusCode: HttpStatus.OK,
@@ -116,7 +129,7 @@ export class UsersController {
     type: User
   })
   @Post('otp_verification')
-  async otpVerification(@Body() otpDto: OtpDto): Promise<any> {
+  async otpVerification(@Req() req: Request, @Body() otpDto: OtpDto): Promise<any> {
     const foundOtp = await this.otpsService.findOtpByUsername(otpDto.username);
 
     const foundUser = await this.usersService.findUserByUsername(otpDto.username);
@@ -136,9 +149,23 @@ export class UsersController {
     if (foundOtp.expireTime <= Date.now() / 1000) {
       throw new BadRequestException('OTP expired');
     }
-
+    
     const { otp, ...signUpDto } = otpDto;
-    return await this.usersService.createUser(signUpDto);
+
+    const savedUser = await this.usersService.createUser(signUpDto);
+
+    // make audit log
+    this.auditLogsService.save({
+      action: "CREATE",
+      entity: "User",
+      entityId: savedUser.id,
+      userId: savedUser.id,
+      username: savedUser.username,
+      role: savedUser.role,
+      details: "A user's account has been created'",
+    });
+  
+    return savedUser;
   }
 
 
@@ -158,7 +185,7 @@ export class UsersController {
     }
   })
   @Post('password_recovery')
-  async passwordRecovery(@Body() passwordRecoveryDto: PasswordRecoveryDto): Promise<any> {
+  async passwordRecovery(@Req() req: Request, @Body() passwordRecoveryDto: PasswordRecoveryDto): Promise<any> {
     const foundUser = await this.usersService.findUserByUsername(passwordRecoveryDto.username);
 
     if (!foundUser) {
@@ -176,6 +203,17 @@ export class UsersController {
     const newPassword = await this.usersService.updatePasswordRandomly(passwordRecoveryDto.username);
 
     this.mailService.sendPasswordRecovery(passwordRecoveryDto.username, passwordRecoveryDto.email, newPassword);
+
+    // make audit log
+    this.auditLogsService.save({
+      action: "UPDATE",
+      entity: "User",
+      entityId: -1,
+      userId: -1,
+      username: passwordRecoveryDto.username,
+      role: 'user',
+      details: "A user's password has been changed (randomly)",
+    });
 
     return {
       message: 'New password was sent to your email',
@@ -269,7 +307,20 @@ export class UsersController {
     }
 
     const { id } = req.user as { id: number; username: string; role: string };
-    return await this.usersService.updateUserInformation(id, updateDto);
+    const updatedUser = await this.usersService.updateUserInformation(id, updateDto);
+
+    // make audit log
+    this.auditLogsService.save({
+      action: "UPDATE",
+      entity: "User",
+      entityId: updatedUser.id,
+      userId: updatedUser.id,
+      username: updatedUser.username,
+      role: updatedUser.role,
+      details: "A user has updated his/her information",
+    });
+
+    return updatedUser;
   }
 
 
@@ -307,7 +358,7 @@ export class UsersController {
   )
   @Patch(':id')
   @UseGuards(JwtGuard, AdminGuard)
-  async updateUsersInformation(@Param('id') id: number, @Body() adminUpdateDto: AdminUpdateDto): Promise<User> {
+  async updateUsersInformation(@Req() req: Request, @Param('id') id: number, @Body() adminUpdateDto: AdminUpdateDto): Promise<User> {
     if (await this.usersService.findUserByUsername(adminUpdateDto.username)) {
       throw new BadRequestException('Existed username');
     }
@@ -320,7 +371,21 @@ export class UsersController {
       throw new BadRequestException('Existed phone number');
     }
 
-    return await this.usersService.updateUserInformationForAdmin(id, adminUpdateDto);
+    const updatedUser = await this.usersService.updateUserInformationForAdmin(id, adminUpdateDto);
+    
+    const userMadeChange = req.user as { id: number; username: string; role: string };
+    // make audit log
+    this.auditLogsService.save({
+      action: "UPDATE",
+      entity: "User",
+      entityId: updatedUser.id,
+      userId: userMadeChange.id,
+      username: userMadeChange.username,
+      role: userMadeChange.role,
+      details: "An admin has changed a user's information",
+    });
+
+    return updatedUser;
   }
 
 
@@ -347,20 +412,35 @@ export class UsersController {
   @ApiBearerAuth()
   @Delete(':id')
   @UseGuards(JwtGuard, AdminGuard)
-  async deleteUserAccount(@Param('id') id: number): Promise<User> {
-    const user = await this.usersService.findUserById(id);
+  async deleteUserAccount(@Req() req: Request, @Param('id') id: number): Promise<User> {
+    const deletedUser = await this.usersService.findUserById(id);
 
-    if (!user) {
+    if (!deletedUser) {
       throw new NotFoundException('User not found');
     }
 
+    const userMadeChange = req.user as { id: number; username: string; role: string };
+    // make audit log
+    this.auditLogsService.save({
+      action: "DELETE",
+      entity: "User",
+      entityId: deletedUser.id,
+      userId: userMadeChange.id,
+      username: userMadeChange.username,
+      role: userMadeChange.role,
+      details: "An admin has deleted a user's account",
+    });
+
     await this.usersService.deleteUserById(id);
-    return user;
+    return deletedUser;
   }
 
 
 
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: "Update user's password"
+  })
   @ApiUnauthorizedResponse({
     description: 'Access token was not given or old password was incorrect',
     example: new UnauthorizedException().getResponse()
@@ -391,12 +471,28 @@ export class UsersController {
       throw new UnauthorizedException('Old password is incorrect');
     }
 
-    return await this.usersService.updatePassword(id, passwordDto.newPassword);
+    const updatedUser = await this.usersService.updatePassword(id, passwordDto.newPassword);
+
+    // make audit log
+    this.auditLogsService.save({
+      action: "UPDATE",
+      entity: "User",
+      entityId: updatedUser.id,
+      userId: updatedUser.id,
+      username: updatedUser.username,
+      role: updatedUser.role,
+      details: "A user has changed his/her password",
+    });
+
+    return updatedUser;
   }
 
 
 
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: "Update user's avatar"
+  })
   @ApiOkResponse({
     description: "Change avatar successfully",
     type: User
@@ -405,6 +501,20 @@ export class UsersController {
   @UseGuards(JwtGuard)
   async updateAvatar(@Req() req: Request, @Body() avatarDto: AvatarDto): Promise<User> {
     const { id } = req.user as { id: number; username: string; role: string };
-    return await this.usersService.updateAvatar(id, avatarDto);
+
+    const updatedUser = await this.usersService.updateAvatar(id, avatarDto);
+
+    // make audit log
+    this.auditLogsService.save({
+      action: "UPDATE",
+      entity: "User",
+      entityId: updatedUser.id,
+      userId: updatedUser.id,
+      username: updatedUser.username,
+      role: updatedUser.role,
+      details: "A user has changed his/her avatar",
+    });
+
+    return updatedUser;
   }
 }

@@ -9,6 +9,8 @@ import { OtpsModule } from './otps/otps.module';
 import { Otp } from './otps/entities/otp.entity';
 import { MailModule } from './mail/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { AuditLog } from './audit-logs/entities/audit-log.entity';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        entities: [User, Otp],
+        entities: [User, Otp, AuditLog],
         synchronize: true,
         logging: true,
       }),
@@ -33,6 +35,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AuthModule,
     OtpsModule,
     MailModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
