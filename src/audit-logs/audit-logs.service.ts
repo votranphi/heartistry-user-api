@@ -18,7 +18,6 @@ export class AuditLogsService {
         savedAuditLog.userId = auditLog.userId;
         savedAuditLog.username = auditLog.username;
         savedAuditLog.role = auditLog.role;
-        savedAuditLog.ipAddress = auditLog.ipAddress;
         savedAuditLog.details = auditLog.details;
 
         return await this.auditLogsRepository.save(savedAuditLog);

@@ -48,13 +48,6 @@ export class AuditLog {
     })
     @Column({ type: 'varchar' })
     role: string; // 'user', 'admin'
-
-    @ApiProperty({
-        description: "IP address of the user who made the change",
-        example: 100
-    })
-    @Column({ type: 'varchar' })
-    ipAddress: string;
     
     @ApiProperty({
         description: "Details of the changes",

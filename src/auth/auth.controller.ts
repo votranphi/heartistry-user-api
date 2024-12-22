@@ -48,7 +48,6 @@ export class AuthController {
             userId: user.id,
             username: user.username,
             role: user.role,
-            ipAddress: req.ip,
             details: "A user has logged in",
         });
         

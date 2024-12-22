@@ -106,7 +106,6 @@ export class UsersController {
       userId: -1,
       username: signUpDto.username,
       role: "user",
-      ipAddress: req.ip,
       details: "A user has been signed up and waiting for email verification",
     });
 
@@ -163,7 +162,6 @@ export class UsersController {
       userId: savedUser.id,
       username: savedUser.username,
       role: savedUser.role,
-      ipAddress: req.ip,
       details: "A user's account has been created'",
     });
   
@@ -214,7 +212,6 @@ export class UsersController {
       userId: -1,
       username: passwordRecoveryDto.username,
       role: 'user',
-      ipAddress: req.ip,
       details: "A user's password has been changed (randomly)",
     });
 
@@ -320,7 +317,6 @@ export class UsersController {
       userId: updatedUser.id,
       username: updatedUser.username,
       role: updatedUser.role,
-      ipAddress: req.ip,
       details: "A user has updated his/her information",
     });
 
@@ -386,7 +382,6 @@ export class UsersController {
       userId: userMadeChange.id,
       username: userMadeChange.username,
       role: userMadeChange.role,
-      ipAddress: req.ip,
       details: "An admin has changed a user's information",
     });
 
@@ -433,7 +428,6 @@ export class UsersController {
       userId: userMadeChange.id,
       username: userMadeChange.username,
       role: userMadeChange.role,
-      ipAddress: req.ip,
       details: "An admin has deleted a user's account",
     });
 
@@ -487,7 +481,6 @@ export class UsersController {
       userId: updatedUser.id,
       username: updatedUser.username,
       role: updatedUser.role,
-      ipAddress: req.ip,
       details: "A user has changed his/her password",
     });
 
@@ -519,7 +512,6 @@ export class UsersController {
       userId: updatedUser.id,
       username: updatedUser.username,
       role: updatedUser.role,
-      ipAddress: req.ip,
       details: "A user has changed his/her avatar",
     });
 
