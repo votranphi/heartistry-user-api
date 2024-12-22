@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Controller, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalGuard } from './guards/local.guard';
 import { Request } from 'express';
@@ -22,6 +22,12 @@ export class AuthController {
     @Post('token')
     @UseGuards(LocalGuard)
     async login(@Req() req: Request) {
-        return req.user;
+        const { username, password } = req.user as { username: string, password: string };
+
+        const accessToken = await this.authService.validateUser({ username, password });
+
+        if (!accessToken) throw new UnauthorizedException();
+
+        return accessToken;
     }
 }
