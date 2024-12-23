@@ -17,6 +17,7 @@ import {
   Param,
   Delete,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -34,6 +35,7 @@ import { AdminUpdateDto } from './dto/admin-update.dto';
 import { PasswordDto } from './dto/password.dto';
 import { AvatarDto } from './dto/avatar.dto';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
+import { PaginationDto } from './dto/pagination.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -149,7 +151,7 @@ export class UsersController {
     if (foundOtp.expireTime <= Date.now() / 1000) {
       throw new BadRequestException('OTP expired');
     }
-    
+
     const { otp, ...signUpDto } = otpDto;
 
     const savedUser = await this.usersService.createUser(signUpDto);
@@ -164,7 +166,7 @@ export class UsersController {
       role: savedUser.role,
       details: "A user's account has been created'",
     });
-  
+
     return savedUser;
   }
 
@@ -264,6 +266,30 @@ export class UsersController {
   @UseGuards(JwtGuard, AdminGuard)
   async getAllUsers(): Promise<User[]> {
     return await this.usersService.findAllUsers();
+  }
+
+
+
+  @ApiOperation({
+    summary: "Get all users' information with pagination (Admin only)"
+  })
+  @ApiOkResponse({
+    description: "Get paginated users account information successfully",
+    type: [User]
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Access token was not given',
+    example: new UnauthorizedException().getResponse()
+  })
+  @ApiForbiddenResponse({
+    description: "Given token wasn't from an admin",
+    example: new ForbiddenException("Access denied: Admins only").getResponse()
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard, AdminGuard)
+  @Get('all/pagination')
+  async getPaginatedUsers(@Query() paginationDto: PaginationDto) {
+    return await this.usersService.findPaginatedUsers(paginationDto);
   }
 
 
@@ -376,7 +402,7 @@ export class UsersController {
     }
 
     const updatedUser = await this.usersService.updateUserInformationForAdmin(id, adminUpdateDto);
-    
+
     const userMadeChange = req.user as { id: number; username: string; role: string };
     // make audit log
     this.auditLogsService.save({

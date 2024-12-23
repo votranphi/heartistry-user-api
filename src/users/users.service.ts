@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { UpdateDto } from './dto/update.dto';
 import { AdminUpdateDto } from './dto/admin-update.dto';
 import { AvatarDto } from './dto/avatar.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
@@ -90,6 +91,24 @@ export class UsersService {
 
   async findAllUsers(): Promise<User[]> {
     return await this.usersRepository.find();
+  }
+
+  async findPaginatedUsers(paginationDto: PaginationDto) {
+    const { page, pageSize } = paginationDto;
+
+    const [data, total] = await this.usersRepository.findAndCount({
+      skip: page * pageSize,
+      take: pageSize,
+    });
+
+    return {
+      response: data,
+      pagination: {
+        page,
+        pageSize,
+        total,
+      },
+    };
   }
 
   async updateUserInformation(id: number, updateDto: UpdateDto): Promise<User> {
