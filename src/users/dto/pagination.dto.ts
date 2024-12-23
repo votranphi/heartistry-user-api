@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class PaginationDto {
     @ApiProperty({
-        description: 'Page order to get (0-based index',
+        description: 'Page order to get (0-based index)',
         example: '0'
     })
     page: number;
