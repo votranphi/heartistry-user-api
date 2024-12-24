@@ -324,15 +324,20 @@ export class UsersController {
   @Patch('me')
   @UseGuards(JwtGuard)
   async updateMyInformation(@Req() req: Request, @Body() updateDto: UpdateDto): Promise<User> {
-    if (await this.usersService.findUserByEmail(updateDto.email)) {
+    const { id } = req.user as { id: number; username: string; role: string };
+
+    const foundUserByEmail = await this.usersService.findUserByEmail(updateDto.email);
+
+    if (foundUserByEmail.id !== id) {
       throw new BadRequestException('Existed email');
     }
 
-    if (await this.usersService.findUserByPhoneNumber(updateDto.phoneNumber)) {
+    const foundUserByPhoneNumber = await this.usersService.findUserByPhoneNumber(updateDto.phoneNumber);
+
+    if (foundUserByPhoneNumber.id !== id) {
       throw new BadRequestException('Existed phone number');
     }
 
-    const { id } = req.user as { id: number; username: string; role: string };
     const updatedUser = await this.usersService.updateUserInformation(id, updateDto);
 
     // make audit log
