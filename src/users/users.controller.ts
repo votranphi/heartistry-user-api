@@ -62,6 +62,17 @@ export class UsersController {
     type: User
   })
   @ApiBearerAuth()
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      errorHttpStatusCode: 400,
+    })
+  )
   @UseGuards(JwtGuard, AdminGuard)
   @Post('add')
   async createAdmin(@Req() req: Request, @Body() addDto: AddDto): Promise<any> {
