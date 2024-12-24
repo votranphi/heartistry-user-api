@@ -36,6 +36,7 @@ import { PasswordDto } from './dto/password.dto';
 import { AvatarDto } from './dto/avatar.dto';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 import { PaginationDto } from './dto/pagination.dto';
+import { AddDto } from './dto/add.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -46,6 +47,52 @@ export class UsersController {
     private readonly otpsService: OtpsService,
     private readonly auditLogsService: AuditLogsService,
   ) { }
+
+
+
+  @ApiOperation({
+    summary: 'Add a new user (Admin only)'
+  })
+  @ApiBadRequestResponse({
+    description: "Username, email or phone number has been taken",
+    example: new BadRequestException('Message').getResponse()
+  })
+  @ApiOkResponse({
+    description: 'Account has been signed up and added to database',
+    type: User
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard, AdminGuard)
+  @Post('add')
+  async createAdmin(@Req() req: Request, @Body() addDto: AddDto): Promise<any> {
+    if (await this.usersService.findUserByUsername(addDto.username)) {
+      throw new BadRequestException('Existed username');
+    }
+
+    if (await this.usersService.findUserByEmail(addDto.email)) {
+      throw new BadRequestException('Existed email');
+    }
+
+    if (await this.usersService.findUserByPhoneNumber(addDto.phoneNumber)) {
+      throw new BadRequestException('Existed phone number');
+    }
+
+    const savedUser = await this.usersService.createUserForAdmin(addDto);
+
+    const { id, username, role } = req.user as { id: number, username: string, role: string }
+    // make audit log
+    this.auditLogsService.save({
+      action: "CREATE",
+      entity: "User",
+      entityId: savedUser.id,
+      userId: id,
+      username: username,
+      role: role,
+      details: "A user's account has been created by an Admin'",
+    });
+
+    return savedUser;
+  }
 
 
 
