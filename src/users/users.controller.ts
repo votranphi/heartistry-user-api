@@ -396,13 +396,13 @@ export class UsersController {
 
     const foundUserByEmail = await this.usersService.findUserByEmail(adminUpdateDto.email);
 
-    if (foundUserByEmail.id !== id) {
+    if (foundUserByEmail && foundUserByEmail.id !== id) {
       throw new BadRequestException('Existed email');
     }
 
     const foundUserByPhoneNumber = await this.usersService.findUserByPhoneNumber(adminUpdateDto.phoneNumber);
 
-    if (foundUserByPhoneNumber.id !== id) {
+    if (foundUserByPhoneNumber && foundUserByPhoneNumber.id !== id) {
       throw new BadRequestException('Existed phone number');
     }
 
