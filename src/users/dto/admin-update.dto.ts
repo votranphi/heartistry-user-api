@@ -24,17 +24,6 @@ export class AdminUpdateDto {
     fullname: string;
 
     @ApiProperty({
-        description: 'Username of the user',
-        example: 'nguyenvana'
-    })
-    @IsNotEmpty()
-    @MinLength(3, { message: 'Username must have at least 3 characters.' })
-    @IsAlphanumeric(undefined, {
-        message: 'Username does not allow other than alpha numeric chars.',
-    })
-    username: string;
-
-    @ApiProperty({
         description: 'Email of the user',
         example: 'nguyenvana@gmail.com'
     })

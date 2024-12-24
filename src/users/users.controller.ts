@@ -394,10 +394,6 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
 
-    if (await this.usersService.findUserByUsername(adminUpdateDto.username)) {
-      throw new BadRequestException('Existed username');
-    }
-
     if (await this.usersService.findUserByEmail(adminUpdateDto.email)) {
       throw new BadRequestException('Existed email');
     }
