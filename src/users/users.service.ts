@@ -7,6 +7,7 @@ import { UpdateDto } from './dto/update.dto';
 import { AdminUpdateDto } from './dto/admin-update.dto';
 import { AvatarDto } from './dto/avatar.dto';
 import { PaginationDto } from './dto/pagination.dto';
+import { AddDto } from './dto/add.dto';
 
 @Injectable()
 export class UsersService {
@@ -23,6 +24,19 @@ export class UsersService {
     user.username = signUpDto.username;
     user.password = signUpDto.password;
     user.gender = signUpDto.gender;
+
+    return await this.usersRepository.save(user);
+  }
+
+  async createUserForAdmin(addDto: AddDto): Promise<User> {
+    const user: User = new User();
+    user.fullname = addDto.fullname;
+    user.dob = addDto.dob;
+    user.email = addDto.email;
+    user.phoneNumber = addDto.phoneNumber;
+    user.username = addDto.username;
+    user.password = addDto.password;
+    user.gender = addDto.gender;
 
     return await this.usersRepository.save(user);
   }
@@ -129,7 +143,6 @@ export class UsersService {
     const foundUser = await this.findUserById(id);
 
     foundUser.fullname = adminUpdateDto.fullname;
-    foundUser.username = adminUpdateDto.username;
     foundUser.email = adminUpdateDto.email;
     foundUser.phoneNumber = adminUpdateDto.phoneNumber;
     foundUser.dob = adminUpdateDto.dob;

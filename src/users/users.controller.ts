@@ -36,6 +36,7 @@ import { PasswordDto } from './dto/password.dto';
 import { AvatarDto } from './dto/avatar.dto';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 import { PaginationDto } from './dto/pagination.dto';
+import { AddDto } from './dto/add.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -46,6 +47,63 @@ export class UsersController {
     private readonly otpsService: OtpsService,
     private readonly auditLogsService: AuditLogsService,
   ) { }
+
+
+
+  @ApiOperation({
+    summary: 'Add a new user (Admin only)'
+  })
+  @ApiBadRequestResponse({
+    description: "Username, email or phone number has been taken",
+    example: new BadRequestException('Message').getResponse()
+  })
+  @ApiOkResponse({
+    description: 'Account has been signed up and added to database',
+    type: User
+  })
+  @ApiBearerAuth()
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      errorHttpStatusCode: 400,
+    })
+  )
+  @UseGuards(JwtGuard, AdminGuard)
+  @Post('add')
+  async createAdmin(@Req() req: Request, @Body() addDto: AddDto): Promise<any> {
+    if (await this.usersService.findUserByUsername(addDto.username)) {
+      throw new BadRequestException('Existed username');
+    }
+
+    if (await this.usersService.findUserByEmail(addDto.email)) {
+      throw new BadRequestException('Existed email');
+    }
+
+    if (await this.usersService.findUserByPhoneNumber(addDto.phoneNumber)) {
+      throw new BadRequestException('Existed phone number');
+    }
+
+    const savedUser = await this.usersService.createUserForAdmin(addDto);
+
+    const { id, username, role } = req.user as { id: number, username: string, role: string }
+    // make audit log
+    this.auditLogsService.save({
+      action: "CREATE",
+      entity: "User",
+      entityId: savedUser.id,
+      userId: id,
+      username: username,
+      role: role,
+      details: "A user's account has been created by an Admin'",
+    });
+
+    return savedUser;
+  }
 
 
 
@@ -324,15 +382,20 @@ export class UsersController {
   @Patch('me')
   @UseGuards(JwtGuard)
   async updateMyInformation(@Req() req: Request, @Body() updateDto: UpdateDto): Promise<User> {
-    if (await this.usersService.findUserByEmail(updateDto.email)) {
+    const { id } = req.user as { id: number; username: string; role: string };
+
+    const foundUserByEmail = await this.usersService.findUserByEmail(updateDto.email);
+
+    if (foundUserByEmail.id !== id) {
       throw new BadRequestException('Existed email');
     }
 
-    if (await this.usersService.findUserByPhoneNumber(updateDto.phoneNumber)) {
+    const foundUserByPhoneNumber = await this.usersService.findUserByPhoneNumber(updateDto.phoneNumber);
+
+    if (foundUserByPhoneNumber.id !== id) {
       throw new BadRequestException('Existed phone number');
     }
 
-    const { id } = req.user as { id: number; username: string; role: string };
     const updatedUser = await this.usersService.updateUserInformation(id, updateDto);
 
     // make audit log
@@ -389,15 +452,15 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
 
-    if (await this.usersService.findUserByUsername(adminUpdateDto.username)) {
-      throw new BadRequestException('Existed username');
-    }
+    const foundUserByEmail = await this.usersService.findUserByEmail(adminUpdateDto.email);
 
-    if (await this.usersService.findUserByEmail(adminUpdateDto.email)) {
+    if (foundUserByEmail && foundUserByEmail.id !== id) {
       throw new BadRequestException('Existed email');
     }
 
-    if (await this.usersService.findUserByPhoneNumber(adminUpdateDto.phoneNumber)) {
+    const foundUserByPhoneNumber = await this.usersService.findUserByPhoneNumber(adminUpdateDto.phoneNumber);
+
+    if (foundUserByPhoneNumber && foundUserByPhoneNumber.id !== id) {
       throw new BadRequestException('Existed phone number');
     }
 
