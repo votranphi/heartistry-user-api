@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 declare const module: any;
 
 async function bootstrap() {
@@ -17,7 +18,11 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
 
   app.enableCors();
-  await app.listen(3030);
+
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('SERVER_PORT') || 3000;
+  console.log(port);
+  await app.listen(port);
 
   // allow hot module
   if (module.hot) {
