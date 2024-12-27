@@ -107,6 +107,10 @@ Contributions are welcome! Please follow these steps to contribute:
    ```
 5. Open a Pull Request.
 
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE). See the `LICENSE` file for details.
+
 ## Credits
 Contributors:
 - Vo Tran Phi (Student ID: 22521081)  
