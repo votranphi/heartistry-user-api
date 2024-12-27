@@ -1,5 +1,11 @@
 # Heartistry Backend User/Auth API
 
+![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
+![NestJS](https://img.shields.io/badge/NestJS-10.x-red)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue)
+![License](https://img.shields.io/github/license/votranphi/heartistry-user-api)
+![Prettier](https://img.shields.io/badge/Code%20Style-Prettier-ff69b4)
+
 This repository contains the backend API for the **Heartistry** web application, built using **NestJS**. The backend provides essential services for managing users, email verification, authentication, and logging.
 
 ## Features
