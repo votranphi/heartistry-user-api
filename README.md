@@ -1,9 +1,13 @@
 # Heartistry Backend User/Auth API
 
+![Repo Size](https://img.shields.io/github/repo-size/votranphi/heartistry-user-api)
+![Last Commit](https://img.shields.io/github/last-commit/votranphi/heartistry-user-api)
+![Open Issues](https://img.shields.io/github/issues/votranphi/heartistry-user-api)
+![License](https://img.shields.io/github/license/votranphi/heartistry-user-api)
+
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
 ![NestJS](https://img.shields.io/badge/NestJS-10.x-red)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue)
-![License](https://img.shields.io/github/license/votranphi/heartistry-user-api)
 ![Prettier](https://img.shields.io/badge/Code%20Style-Prettier-ff69b4)
 ![OpenAPI](https://img.shields.io/badge/OpenAPI-Enabled-blue)
 
