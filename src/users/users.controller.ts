@@ -99,7 +99,7 @@ export class UsersController {
       userId: id,
       username: username,
       role: role,
-      details: "A user's account has been created by an Admin'",
+      details: "A user's account has been created by an Admin",
     });
 
     return savedUser;
@@ -222,7 +222,7 @@ export class UsersController {
       userId: savedUser.id,
       username: savedUser.username,
       role: savedUser.role,
-      details: "A user's account has been created'",
+      details: "A user's account has been created",
     });
 
     return savedUser;
